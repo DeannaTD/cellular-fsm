@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Text;
 
 namespace Morse
@@ -29,6 +31,14 @@ namespace Morse
             Console.OutputEncoding = Encoding.UTF8;
 
             int intRule = -1;
+            int imageWidth = 0, imageHeight = 0;
+
+            Console.Write("Input image's width: ");
+            int.TryParse(Console.ReadLine(), out imageWidth);
+
+            Console.Write("Input image's height: ");
+            int.TryParse(Console.ReadLine(), out imageHeight);
+
             do
             {
                 Console.Write("Input the rule (0-256): ");
@@ -36,7 +46,7 @@ namespace Morse
             }
             while (intRule == -1);
             
-            int N = 512;
+            int N = imageWidth;
 
             int[] config = new int[N];
             int[] prev = new int[N];
@@ -47,7 +57,20 @@ namespace Morse
             //for (int i = 0; i < N; i++) config[i] = 0;
             //config[N / 2] = 1;
             //for (int i = 0; i < N; i++) prev[i] = config[i];
-            Show(config);
+            //Show(config);
+
+            int globalY = 0;
+
+            Bitmap map = new Bitmap(imageWidth, imageHeight);
+            Graphics graphics = Graphics.FromImage(map);
+
+            for (int i = 0; i < config.Length; i++)
+            {
+                if (config[i] == 0) map.SetPixel(i, globalY, Color.White);
+                else map.SetPixel(i, globalY, Color.Black);
+            }
+            globalY++;
+
             string result = "";
             int rule = 0;
 
@@ -57,7 +80,7 @@ namespace Morse
                 binRule.Insert(0, "0");
             }
 
-            while (true)
+            while (globalY < imageHeight)
             {
                 for(int i = 0; i<N; i++)
                 {
@@ -80,9 +103,16 @@ namespace Morse
                         case 7: config[i] = Convert.ToInt32(binRule[0].ToString()); break;
                     }
                 }
-                Show(config);
+                for (int x = 0; x < config.Length; x++)
+                {
+                    if (config[x] == 0) map.SetPixel(x, globalY, Color.White);
+                    else map.SetPixel(x, globalY, Color.Black);
+                }
+                globalY++;
                 for (int i = 0; i < N; i++) prev[i] = config[i];
             }
+
+            map.Save("map.png", ImageFormat.Png);
         }
 
         static void Show(int[] config)

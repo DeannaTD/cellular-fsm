@@ -100,9 +100,9 @@ namespace FSM
 
             Bitmap bitmap = new Bitmap(width, height);
 
-            for(int y = 0; y < width; y++)
+            for(int y = 0; y < height; y++)
             {
-                for(int x = 0; x < height; x++)
+                for(int x = 0; x < width; x++)
                 {
                     if (!State[x]) bitmap.SetPixel(x, y, Color.White);
                     else bitmap.SetPixel(x, y, Color.Black);

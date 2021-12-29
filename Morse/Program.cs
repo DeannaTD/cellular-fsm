@@ -28,91 +28,33 @@ namespace Morse
          */
         static void Main(string[] args)
         {
-            Console.Clear();
             Console.OutputEncoding = Encoding.UTF8;
 
-            int intRule = -1;
+            int intRule = 0;
             int imageWidth = 0, imageHeight = 0;
 
-            Console.Write("Input image's width: ");
-            int.TryParse(Console.ReadLine(), out imageWidth);
-
-            Console.Write("Input image's height: ");
-            int.TryParse(Console.ReadLine(), out imageHeight);
-
-            do
-            {
-                Console.Write("Input the rule (0-256): ");
-                intRule = GetRule(Console.ReadLine());
-            }
-            while (intRule == -1);
+            imageWidth = GetCheckedValue("Input image's width", (int value) => value > 0 && value < 2048);
+            imageHeight = GetCheckedValue("Input image's height", (int value) => value > 0 && value < 2048);
+            intRule = GetCheckedValue("Input the rule", (int value) => value >= 0 && value < 256);
 
             ElementaryCellularMachine machine = new ElementaryCellularMachine(intRule, false, imageWidth);
 
-            int N = imageWidth;
-
-            int globalY = 0;
-
-            Bitmap map = new Bitmap(imageWidth, imageHeight);
-
-            for (int i = 0; i < machine.Size; i++)
-            {
-                if (!machine.State[i]) map.SetPixel(i, globalY, Color.White);
-                else map.SetPixel(i, globalY, Color.Black);
-            }
-            globalY++;
-
-            string binRule = Convert.ToString(intRule, 2);
-            while(binRule.Length != 8)
-            {
-                binRule = binRule.Insert(0, "0");
-            }
-
-            while (globalY < imageHeight)
-            {
-                machine.GenerateNextState();
-                for (int x = 0; x < machine.Size; x++)
-                {
-                    if (!machine.State[x]) map.SetPixel(x, globalY, Color.White);
-                    else map.SetPixel(x, globalY, Color.Black);
-                }
-                globalY++;
-            }
+            Bitmap map = machine.GenerateImage(imageHeight);
 
             map.Save("map.png", ImageFormat.Png);
         }
 
-        static void Show(int[] config)
+        static int GetCheckedValue(string message, Func<int, bool> checkFunc)
         {
-            for(int i = 0; i<config.Length; i++)
+            int result = 0;
+            Console.WriteLine(message);
+            do
             {
-                if (config[i] == 0) Console.Write(" ");
-                else Console.Write("●");
+                if (!int.TryParse(Console.ReadLine(), out result)) Console.WriteLine("Value should be an integer, try again");
+                else if (!checkFunc(result)) Console.WriteLine("Error, value is out of bounds, try again");
+                else return result;
             }
-            Console.WriteLine();
-            System.Threading.Thread.Sleep(50);
+            while(true);
         }
-
-        static int GetRule(string rule)
-        {
-            int answer = -1;
-            try
-            {
-                answer = Convert.ToInt32(rule);
-            }
-            catch
-            {
-                Console.Clear();
-            }
-            answer = answer >= 0 && answer < 256 ? answer : -1;
-            if(answer == -1)
-            {
-                Console.WriteLine("Error! Rule must be a number between 0 and 256");
-            }
-            return answer;
-        }
-
-        
-
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 
 namespace FSM
@@ -58,16 +59,6 @@ namespace FSM
             Size = _defaultSize;
         }
 
-        public string GetStateString(char symbolBlack, char symbolWhite)
-        {
-            string result = "";
-            foreach(bool element in State)
-            {
-                result += element ? symbolBlack : symbolWhite;
-            }
-            return result;
-        }
-
         public void GenerateNextState()
         {
             bool[] prevState = new bool[Size];
@@ -100,27 +91,26 @@ namespace FSM
                     case "110": State[index] = _ruleBinary[1] == '0' ? false : true; break;
                     case "111": State[index] = _ruleBinary[0] == '0' ? false : true; break;
                 }
-                //System.Threading.Thread.Sleep(10);
             }
+        }
+
+        public Bitmap GenerateImage(int imageHeight)
+        {
+            int width = Size, height = imageHeight < 0 ? 256 : imageHeight;
+
+            Bitmap bitmap = new Bitmap(width, height);
+
+            for(int y = 0; y < width; y++)
+            {
+                for(int x = 0; x < height; x++)
+                {
+                    if (!State[x]) bitmap.SetPixel(x, y, Color.White);
+                    else bitmap.SetPixel(x, y, Color.Black);
+                }
+                GenerateNextState();
+            }
+
+            return bitmap;
         }
     }
 }
-
-/* result = "";
-                    if (i == 0) result += prev[N - 1];
-                    else result += prev[i - 1];
-                    result += prev[i];
-                    if (i == N - 1) result += prev[0];
-                    else result += prev[i + 1];
-                    rule = Convert.ToInt32(result, 2);
-                    switch (rule)
-                    {
-                        case 0: config[i] = Convert.ToInt32(binRule[7].ToString()); break;
-                        case 1: config[i] = Convert.ToInt32(binRule[6].ToString()); break;
-                        case 2: config[i] = Convert.ToInt32(binRule[5].ToString()); break;
-                        case 3: config[i] = Convert.ToInt32(binRule[4].ToString()); break;
-                        case 4: config[i] = Convert.ToInt32(binRule[3].ToString()); break;
-                        case 5: config[i] = Convert.ToInt32(binRule[2].ToString()); break;
-                        case 6: config[i] = Convert.ToInt32(binRule[1].ToString()); break;
-                        case 7: config[i] = Convert.ToInt32(binRule[0].ToString()); break;
-                    }*/

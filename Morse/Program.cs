@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FSM;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Text;
@@ -45,71 +46,37 @@ namespace Morse
                 intRule = GetRule(Console.ReadLine());
             }
             while (intRule == -1);
-            
+
+            ElementaryCellularMachine machine = new ElementaryCellularMachine(intRule, false, imageWidth);
+
             int N = imageWidth;
-
-            int[] config = new int[N];
-            int[] prev = new int[N];
-            Random random = new Random();
-            for (int i = 0; i < N; i++) config[i] = random.Next(2);
-            for (int i = 0; i < N; i++) prev[i] = config[i];
-
-            //for (int i = 0; i < N; i++) config[i] = 0;
-            //config[N / 2] = 1;
-            //for (int i = 0; i < N; i++) prev[i] = config[i];
-            //Show(config);
 
             int globalY = 0;
 
             Bitmap map = new Bitmap(imageWidth, imageHeight);
-            Graphics graphics = Graphics.FromImage(map);
 
-            for (int i = 0; i < config.Length; i++)
+            for (int i = 0; i < machine.Size; i++)
             {
-                if (config[i] == 0) map.SetPixel(i, globalY, Color.White);
+                if (!machine.State[i]) map.SetPixel(i, globalY, Color.White);
                 else map.SetPixel(i, globalY, Color.Black);
             }
             globalY++;
 
-            string result = "";
-            int rule = 0;
-
             string binRule = Convert.ToString(intRule, 2);
             while(binRule.Length != 8)
             {
-                binRule.Insert(0, "0");
+                binRule = binRule.Insert(0, "0");
             }
 
             while (globalY < imageHeight)
             {
-                for(int i = 0; i<N; i++)
+                machine.GenerateNextState();
+                for (int x = 0; x < machine.Size; x++)
                 {
-                    result = "";
-                    if (i == 0) result += prev[N - 1];
-                    else result += prev[i - 1];
-                    result += prev[i];
-                    if (i == N - 1) result += prev[0];
-                    else result += prev[i + 1];
-                    rule = Convert.ToInt32(result, 2);
-                    switch (rule)
-                    {
-                        case 0: config[i] = Convert.ToInt32(binRule[7].ToString()); break;
-                        case 1: config[i] = Convert.ToInt32(binRule[6].ToString()); break;
-                        case 2: config[i] = Convert.ToInt32(binRule[5].ToString()); break;
-                        case 3: config[i] = Convert.ToInt32(binRule[4].ToString()); break;
-                        case 4: config[i] = Convert.ToInt32(binRule[3].ToString()); break;
-                        case 5: config[i] = Convert.ToInt32(binRule[2].ToString()); break;
-                        case 6: config[i] = Convert.ToInt32(binRule[1].ToString()); break;
-                        case 7: config[i] = Convert.ToInt32(binRule[0].ToString()); break;
-                    }
-                }
-                for (int x = 0; x < config.Length; x++)
-                {
-                    if (config[x] == 0) map.SetPixel(x, globalY, Color.White);
+                    if (!machine.State[x]) map.SetPixel(x, globalY, Color.White);
                     else map.SetPixel(x, globalY, Color.Black);
                 }
                 globalY++;
-                for (int i = 0; i < N; i++) prev[i] = config[i];
             }
 
             map.Save("map.png", ImageFormat.Png);
@@ -145,42 +112,7 @@ namespace Morse
             return answer;
         }
 
+        
+
     }
 }
-
-
-/*
- public class Example
-{
-   private static System.Timers.Timer aTimer;
-   
-   public static void Main()
-   {
-      SetTimer();
-
-      Console.WriteLine("\nPress the Enter key to exit the application...\n");
-      Console.WriteLine("The application started at {0:HH:mm:ss.fff}", DateTime.Now);
-      Console.ReadLine();
-      aTimer.Stop();
-      aTimer.Dispose();
-      
-      Console.WriteLine("Terminating the application...");
-   }
-
-   private static void SetTimer()
-   {
-        // Create a timer with a two second interval.
-        aTimer = new System.Timers.Timer(2000);
-        // Hook up the Elapsed event for the timer. 
-        aTimer.Elapsed += OnTimedEvent;
-        aTimer.AutoReset = true;
-        aTimer.Enabled = true;
-    }
-
-    private static void OnTimedEvent(Object source, ElapsedEventArgs e)
-    {
-        Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
-                          e.SignalTime);
-    }
-}
-*/
